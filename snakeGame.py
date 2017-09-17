@@ -39,38 +39,64 @@ snake_body = [[snake_initial_x_position, snake_initial_y_position], [snake_initi
 direction = 'RIGHT'
 change_to = direction
 pause = False
+score = 0
+msg_display = False
+msg_time = time.time()
+msg_duration = 2
 
-def show_text(text="Nice try", color=color_red, position=(360, 230), duration=1):
+def show_text(text="Nice try", color=color_blue, position=(int(screen_widht/2), 20)):
     text_font = pygame.font.SysFont("monaco", 72)  # pygame.font.SysFont(name, size)
     text_surface = text_font.render(text, True, color)  # gameover_font.render(text, antialias, color) - The surface where the font will be rendered
     text_rectangule = text_surface.get_rect()  # represents the rectangle of the surface
     text_rectangule.midtop = position  # (x=horizontal, y=vertical) coordinates
     play_surface.blit(text_surface, text_rectangule)  # puts the surface on the play surface
-    pygame.display.flip() # flips the frame to make the text appear
-    time.sleep(duration)
 
 
 def quit_game():
-    show_text("Bye")
+    play_surface.fill(color_white)
+    show_text(text="Bye", position=(int(screen_widht/2), int(screen_height/2)))
+    pygame.display.flip()  # flips the frame to make the text appear
+    time.sleep(1)
     pygame.quit()  # pygame exit
     sys.exit(0)  # console exit
 
 
 # Game over function
 def game_over():
-    show_text("Game Over!", color_red, (screen_widht/2, 15), 2)
+    pygame.mixer.music.set_endevent(pygame.USEREVENT)
+    pygame.mixer.music.load("gameover.mp3")
+    pygame.mixer.music.play()
+    show_score(0)
+    show_text(text="Game Over!", color=color_red)
+    pygame.display.flip()  # flips the frame to make the text appear
+    time.sleep(3)
     quit_game()
 
 
 def pop_food():
-    position_x = (random.randrange(int(block_size/2), int(screen_widht/block_size))*block_size)-int(block_size/2)
-    position_y = (random.randrange(int(block_size/2), int(screen_height/block_size))*block_size)-int(block_size/2)
+    position_x = (random.randrange(int(block_size/2), int(screen_widht/block_size))*block_size) - int(block_size/2)
+    position_y = (random.randrange(int(block_size/2), int(screen_height/block_size))*block_size) - int(block_size/2)
     food_position = [position_x, position_y]
     return food_position, True
 
 
-show_text(text="Starting Game", color=color_white, duration=1)
+def show_score(choice=1):
+    text_font = pygame.font.SysFont("monaco", 24)
+    score_surface = text_font.render("Score: " + str(score), True, color_black)
+    score_rectangle = score_surface.get_rect()
+    if choice == 1:
+        score_rectangle.midtop = (block_size*2, block_size*2)
+    else:
+        score_rectangle.midtop = (int(screen_widht/2), 100)
+    play_surface.blit(score_surface, score_rectangle)  # puts the surface on the play surface
+
+
+show_text(text="Starting Game", color=color_white)
+pygame.display.flip()  # flips the frame to make the text appear
+time.sleep(1)
 food_position, food_spawn = pop_food()
+
+pygame.mixer.music.load("pop1.mp3")
 
 # Main logic of the game
 while True:
@@ -121,12 +147,19 @@ while True:
             # Snake body mechanism
             snake_body.insert(0, list(snake_position))  # adds one piece in front of the body
             if snake_position[0] == food_position[0] - int(block_size/2) and snake_position[1] == food_position[1] - int(block_size/2):  # if the snake gets the food, we let the piece in front - she will grow
+                score += 1
+                framerate += 1
+                pygame.mixer.music.play()
                 food_spawn = False  # theres no more food
                 food_position, food_spawn = pop_food()
+                msg_display = True
+                msg_time = time.time()
             else:
                 snake_body.pop()  # snake didnt got the food, so we will remove the bottom piece, since we added one at the front
 
             play_surface.fill(color_white)
+            # Drawings should be bellow this line, otherwise they will not appear
+
             for pos in snake_body:  # lets draw the snake body
                 pygame.draw.rect(play_surface, color_green, pygame.Rect(pos[0], pos[1], block_size, block_size))  # pygame.draw.rect(play surface, object color, pygame.Rect(x-pos, y-pos, x-size, y-size))
 
@@ -137,6 +170,18 @@ while True:
             if snake_position[1] > screen_height or snake_position[1] < 0:
                 game_over()
 
+            for block in snake_body[1:]:
+                if snake_position[0] == block[0] and snake_position[1] == block[1]:
+                    game_over()
+
+        if msg_display == True:
+            now = time.time()
+            if int(now - msg_time) < msg_duration:
+                show_text(text="Nice!", position=(screen_widht/4, screen_height/4))
+            else:
+                msg_display = False
+
+        show_score()
         pygame.display.flip() # update the frame
         fps_controller.tick(framerate) # controls the framerate
     except Exception as e:
