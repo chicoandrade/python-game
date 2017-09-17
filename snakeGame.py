@@ -29,9 +29,9 @@ color_brown = pygame.Color(164, 42, 42)
 # Frames per second controller
 fps_controller = pygame.time.Clock()
 
-# Important variables
+# More variables
 framerate = 15
-block_size = 30
+block_size = 20
 snake_initial_x_position = block_size * 3
 snake_initial_y_position = block_size
 snake_position = [snake_initial_x_position, snake_initial_y_position]  # [x=horizontal, y=vertical] position
@@ -62,7 +62,7 @@ def game_over():
 
 
 def pop_food():
-    food_position = [random.randrange(0, int(screen_widht/block_size))*block_size, random.randrange(0, int(screen_height/block_size))*block_size]
+    food_position = [(random.randrange(0, int(screen_widht/block_size))*block_size)-int(block_size/2), (random.randrange(0, int(screen_height/block_size))*block_size)-int(block_size/2)]
     return food_position, True
 
 
@@ -108,7 +108,7 @@ while True:
 
         # Snake body mechanism
         snake_body.insert(0, list(snake_position))  # adds one piece in front of the body
-        if snake_position[0] == food_position[0] and snake_position[1] == food_position[1]:  # if the snake gets the food, we let the piece in front - she will grow
+        if snake_position[0] == food_position[0] - int(block_size/2) and snake_position[1] == food_position[1] - int(block_size/2):  # if the snake gets the food, we let the piece in front - she will grow
             food_spawn = False  # theres no more food
             food_position, food_spawn = pop_food()
         else:
@@ -116,11 +116,11 @@ while True:
 
         play_surface.fill(color_white)
         for pos in snake_body:  # lets draw the snake body
-            pygame.draw.rect(play_surface, color_green, pygame.Rect(pos[0], pos[1], block_size, block_size)) # pygame.draw.rect(play surface, object color, pygame.Rect(x-pos, y-pos, x-size, y-size))
+            pygame.draw.rect(play_surface, color_green, pygame.Rect(pos[0], pos[1], block_size, block_size))  # pygame.draw.rect(play surface, object color, pygame.Rect(x-pos, y-pos, x-size, y-size))
 
-        pygame.draw.rect(play_surface, color_brown, pygame.Rect(food_position[0], food_position[1], block_size, block_size))  # lets draw the food
+        pygame.draw.circle(play_surface, color_brown, (food_position), int(block_size/2))  # surface, color, position, radius, width
 
-        if snake_position[0] > screen_widht or snake_position[0] < 0:
+        if snake_position[0] > screen_widht or snake_position[0] < 0:  # if snakes goes outside the screen
             game_over()
         if snake_position[1] > screen_height or snake_position[1] < 0:
             game_over()
