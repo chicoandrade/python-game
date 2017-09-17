@@ -15,7 +15,7 @@ else:
 # Play Surface
 screen_widht = 720
 screen_height = 460
-play_surface = pygame.display.set_mode((screen_widht, screen_height))  # display size on a tuple
+screen = pygame.display.set_mode((screen_widht, screen_height))  # display size on a tuple
 pygame.display.set_caption("Snakes on a case!")
 
 # Colours
@@ -43,17 +43,19 @@ score = 0
 msg_display = False
 msg_time = time.time()
 msg_duration = 2
+apple_image = pygame.image.load("apple-icon.png").convert()
+apple_image = pygame.transform.scale(apple_image, (int(block_size/2), int(block_size/2)))
 
 def show_text(text="Nice try", color=color_blue, position=(int(screen_widht/2), 20)):
     text_font = pygame.font.SysFont("monaco", 72)  # pygame.font.SysFont(name, size)
     text_surface = text_font.render(text, True, color)  # gameover_font.render(text, antialias, color) - The surface where the font will be rendered
     text_rectangule = text_surface.get_rect()  # represents the rectangle of the surface
     text_rectangule.midtop = position  # (x=horizontal, y=vertical) coordinates
-    play_surface.blit(text_surface, text_rectangule)  # puts the surface on the play surface
+    screen.blit(text_surface, text_rectangule)  # puts the surface on the play surface
 
 
 def quit_game():
-    play_surface.fill(color_white)
+    screen.fill(color_white)
     show_text(text="Bye", position=(int(screen_widht/2), int(screen_height/2)))
     pygame.display.flip()  # flips the frame to make the text appear
     time.sleep(1)
@@ -88,7 +90,7 @@ def show_score(choice=1):
         score_rectangle.midtop = (block_size*2, block_size*2)
     else:
         score_rectangle.midtop = (int(screen_widht/2), 100)
-    play_surface.blit(score_surface, score_rectangle)  # puts the surface on the play surface
+    screen.blit(score_surface, score_rectangle)  # puts the surface on the play surface
 
 
 show_text(text="Starting Game", color=color_white)
@@ -157,13 +159,14 @@ while True:
             else:
                 snake_body.pop()  # snake didnt got the food, so we will remove the bottom piece, since we added one at the front
 
-            play_surface.fill(color_white)
+            screen.fill(color_white)
             # Drawings should be bellow this line, otherwise they will not appear
 
             for pos in snake_body:  # lets draw the snake body
-                pygame.draw.rect(play_surface, color_green, pygame.Rect(pos[0], pos[1], block_size, block_size))  # pygame.draw.rect(play surface, object color, pygame.Rect(x-pos, y-pos, x-size, y-size))
+                pygame.draw.rect(screen, color_green, pygame.Rect(pos[0], pos[1], block_size, block_size))  # pygame.draw.rect(play surface, object color, pygame.Rect(x-pos, y-pos, x-size, y-size))
 
-            pygame.draw.circle(play_surface, color_brown, (food_position), int(block_size/2))  # surface, color, position, radius, width
+            screen.blit(apple_image,(food_position),)
+            #pygame.draw.circle(screen, color_brown, (food_position), int(block_size / 2))  # surface, color, position, radius, width
 
             if snake_position[0] > screen_widht or snake_position[0] < 0:  # if snakes goes outside the screen
                 game_over()
