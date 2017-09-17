@@ -42,20 +42,21 @@ pause = False
 score = 0
 msg_display = False
 msg_time = time.time()
-msg_duration = 45
+msg_duration = 2
 
-def show_text(text="Nice try", color=color_blue, position=(int(screen_widht/2), 20), duration=1):
+def show_text(text="Nice try", color=color_blue, position=(int(screen_widht/2), 20)):
     text_font = pygame.font.SysFont("monaco", 72)  # pygame.font.SysFont(name, size)
     text_surface = text_font.render(text, True, color)  # gameover_font.render(text, antialias, color) - The surface where the font will be rendered
     text_rectangule = text_surface.get_rect()  # represents the rectangle of the surface
     text_rectangule.midtop = position  # (x=horizontal, y=vertical) coordinates
     play_surface.blit(text_surface, text_rectangule)  # puts the surface on the play surface
-    pygame.display.flip() # flips the frame to make the text appear
-    time.sleep(duration)
 
 
 def quit_game():
+    play_surface.fill(color_white)
     show_text(text="Bye", position=(int(screen_widht/2), int(screen_height/2)))
+    pygame.display.flip()  # flips the frame to make the text appear
+    time.sleep(1)
     pygame.quit()  # pygame exit
     sys.exit(0)  # console exit
 
@@ -63,7 +64,9 @@ def quit_game():
 # Game over function
 def game_over():
     show_score(0)
-    show_text(text="Game Over!", color=color_red, duration=2)
+    show_text(text="Game Over!", color=color_red)
+    pygame.display.flip()  # flips the frame to make the text appear
+    time.sleep(1)
     quit_game()
 
 
@@ -83,19 +86,11 @@ def show_score(choice=1):
     else:
         score_rectangle.midtop = (int(screen_widht/2), 100)
     play_surface.blit(score_surface, score_rectangle)  # puts the surface on the play surface
-    pygame.display.flip()
 
 
-def display_message(text="Nice Try"):
-    text_font = pygame.font.SysFont("monaco", 40)
-    msg_surface = text_font.render(text, True, color_blue)
-    msg_rectangle = msg_surface.get_rect()
-    msg_rectangle.midtop = (int(screen_widht/2), 100)
-    play_surface.blit(msg_surface, msg_rectangle)  # puts the surface on the play surface
-    pygame.display.flip()
-
-
-show_text(text="Starting Game", color=color_white, duration=1)
+show_text(text="Starting Game", color=color_white)
+pygame.display.flip()  # flips the frame to make the text appear
+time.sleep(1)
 food_position, food_spawn = pop_food()
 
 # Main logic of the game
@@ -126,13 +121,6 @@ while True:
 
         # Validation of direction
         if pause == False:
-            if msg_display == True:
-                now = time.time()
-                if int(now - msg_time) < msg_duration:
-                    display_message("Nice!")
-                else:
-                    msg_display = False
-
             if change_to == 'UP' and not direction == 'DOWN':
                 direction = change_to
             if change_to == 'DOWN' and not direction == 'UP':
@@ -155,6 +143,7 @@ while True:
             snake_body.insert(0, list(snake_position))  # adds one piece in front of the body
             if snake_position[0] == food_position[0] - int(block_size/2) and snake_position[1] == food_position[1] - int(block_size/2):  # if the snake gets the food, we let the piece in front - she will grow
                 score += 1
+                framerate += 1
                 food_spawn = False  # theres no more food
                 food_position, food_spawn = pop_food()
                 msg_display = True
@@ -163,6 +152,8 @@ while True:
                 snake_body.pop()  # snake didnt got the food, so we will remove the bottom piece, since we added one at the front
 
             play_surface.fill(color_white)
+            # Drawings should be bellow this line, otherwise they will not appear
+
             for pos in snake_body:  # lets draw the snake body
                 pygame.draw.rect(play_surface, color_green, pygame.Rect(pos[0], pos[1], block_size, block_size))  # pygame.draw.rect(play surface, object color, pygame.Rect(x-pos, y-pos, x-size, y-size))
 
@@ -176,6 +167,13 @@ while True:
             for block in snake_body[1:]:
                 if snake_position[0] == block[0] and snake_position[1] == block[1]:
                     game_over()
+
+        if msg_display == True:
+            now = time.time()
+            if int(now - msg_time) < msg_duration:
+                show_text(text="Nice!", position=(screen_widht/4, screen_height/4))
+            else:
+                msg_display = False
 
         show_score()
         pygame.display.flip() # update the frame
