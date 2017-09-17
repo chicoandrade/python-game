@@ -63,10 +63,13 @@ def quit_game():
 
 # Game over function
 def game_over():
+    pygame.mixer.music.set_endevent(pygame.USEREVENT)
+    pygame.mixer.music.load("gameover.mp3")
+    pygame.mixer.music.play()
     show_score(0)
     show_text(text="Game Over!", color=color_red)
     pygame.display.flip()  # flips the frame to make the text appear
-    time.sleep(1)
+    time.sleep(3)
     quit_game()
 
 
@@ -92,6 +95,8 @@ show_text(text="Starting Game", color=color_white)
 pygame.display.flip()  # flips the frame to make the text appear
 time.sleep(1)
 food_position, food_spawn = pop_food()
+
+pygame.mixer.music.load("pop1.mp3")
 
 # Main logic of the game
 while True:
@@ -144,6 +149,7 @@ while True:
             if snake_position[0] == food_position[0] - int(block_size/2) and snake_position[1] == food_position[1] - int(block_size/2):  # if the snake gets the food, we let the piece in front - she will grow
                 score += 1
                 framerate += 1
+                pygame.mixer.music.play()
                 food_spawn = False  # theres no more food
                 food_position, food_spawn = pop_food()
                 msg_display = True
